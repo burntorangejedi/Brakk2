@@ -1,0 +1,28 @@
+# WoW SavedVariables
+*.lua.bak
+*.toc.bak
+
+# Backup files
+*~
+*.swp
+*.swo
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+
+# Package files
+*.zip
+*.7z
+*.rar
