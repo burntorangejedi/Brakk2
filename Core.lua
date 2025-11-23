@@ -85,6 +85,39 @@ function Brakk2:SetupOptions()
                         type = "description",
                         order = 0,
                     },
+                    defaultEditModeProfile = {
+                        name = "Default EditMode Profile",
+                        desc = "Select the EditMode profile to use by default when logging in.",
+                        type = "select",
+                        values = function()
+                            local mod = self:GetModule("WoWOptions")
+                            local profiles = mod:GetEditModeProfiles()
+                            local values = {}
+                            if #profiles == 0 then
+                                values["none"] = "(Open Edit Mode once to load profiles)"
+                            else
+                                for _, p in ipairs(profiles) do
+                                    values[p.id] = p.name
+                                end
+                            end
+                            return values
+                        end,
+                        get = function(info)
+                            local mod = self:GetModule("WoWOptions")
+                            return mod.db.profile.defaultEditModeProfile or ""
+                        end,
+                        set = function(info, val)
+                            local mod = self:GetModule("WoWOptions")
+                            local numVal = tonumber(val)
+                            if not numVal then
+                                print("Brakk2: Please select a valid EditMode profile after opening Edit Mode.")
+                                return
+                            end
+                            mod.db.profile.defaultEditModeProfile = numVal
+                            mod:ApplyEditModeProfile()
+                        end,
+                        order = 6,
+                    },
                     enforceSettings = {
                         name = "Enforce Settings",
                         desc = "Enable automatic enforcement of WoW settings",
@@ -198,6 +231,17 @@ function Brakk2:SetupOptions()
     
     -- Add to Blizzard Interface Options
     self.optionsFrame = AceConfigDialog:AddToBlizOptions("Brakk2", "Brakk2")
+    -- Refresh EditMode profiles every time the options panel is shown
+    if self.optionsFrame and self.optionsFrame:HasScript("OnShow") then
+        local origOnShow = self.optionsFrame:GetScript("OnShow")
+        self.optionsFrame:SetScript("OnShow", function(frame, ...)
+            local mod = self:GetModule("WoWOptions")
+            if mod and mod.UpdateEditModeProfiles then
+                mod:UpdateEditModeProfiles()
+            end
+            if origOnShow then origOnShow(frame, ...) end
+        end)
+    end
 end
 
 -- Event Handlers
@@ -221,6 +265,35 @@ function Brakk2:SlashCommand(input)
         self:Print("  apply - Force apply WoW settings")
     elseif input == "config" then
         Settings.OpenToCategory(self.optionsFrame.name)
+    elseif input == "layouts" then
+        local mod = self:GetModule("WoWOptions")
+        if C_EditMode and C_EditMode.GetLayouts then
+            local layouts = C_EditMode.GetLayouts()
+            print("[Brakk2] C_EditMode.GetLayouts() returned:", layouts)
+            if type(layouts) == "table" then
+                for k, v in pairs(layouts) do
+                    print("[Brakk2] Layout key:", k, "value:", v)
+                    if k == "layouts" and type(v) == "table" then
+                        for i, layout in ipairs(v) do
+                            print("[Brakk2]   Layout #", i)
+                            if type(layout) == "table" then
+                                for k2, v2 in pairs(layout) do
+                                    print("[Brakk2]     ", k2, v2)
+                                end
+                            end
+                        end
+                    elseif type(v) == "table" then
+                        for k2, v2 in pairs(v) do
+                            print("[Brakk2]   ", k2, v2)
+                        end
+                    end
+                end
+            else
+                print("[Brakk2] No layouts found or API returned nil.")
+            end
+        else
+            print("[Brakk2] C_EditMode or GetLayouts not available.")
+        end
     elseif input == "apply" then
         local mod = self:GetModule("WoWOptions")
         if mod then
