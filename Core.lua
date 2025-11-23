@@ -50,9 +50,16 @@ function Brakk2:SetupOptions()
                 args = {
                     enabled = {
                         name = "Enable Addon",
-                        desc = "Enable or disable the addon",
+                        desc = "Enable or disable the addon functionality",
                         type = "toggle",
-                        set = function(info, val) self.db.profile.enabled = val end,
+                        set = function(info, val)
+                            self.db.profile.enabled = val
+                            if val then
+                                self:Print("|cFF00FF00Enabled|r - Addon functionality is now active")
+                            else
+                                self:Print("|cFFFF0000Disabled|r - Addon functionality is now inactive")
+                            end
+                        end,
                         get = function(info) return self.db.profile.enabled end,
                         order = 1,
                     },
@@ -65,6 +72,117 @@ function Brakk2:SetupOptions()
                         name = "Version 1.0.0",
                         type = "description",
                         order = 3,
+                    },
+                },
+            },
+            wowoptions = {
+                name = "WoW Options",
+                type = "group",
+                order = 2,
+                args = {
+                    desc = {
+                        name = "Automatically enforce specific WoW game settings when you log in.",
+                        type = "description",
+                        order = 0,
+                    },
+                    enforceSettings = {
+                        name = "Enforce Settings",
+                        desc = "Enable automatic enforcement of WoW settings",
+                        type = "toggle",
+                        set = function(info, val)
+                            local mod = self:GetModule("WoWOptions")
+                            mod.db.profile.enforceSettings = val
+                        end,
+                        get = function(info)
+                            local mod = self:GetModule("WoWOptions")
+                            return mod.db.profile.enforceSettings
+                        end,
+                        width = "full",
+                        order = 1,
+                    },
+                    autoLoot = {
+                        name = "Auto Loot",
+                        desc = "Automatically enable Auto Loot in game settings",
+                        type = "toggle",
+                        set = function(info, val)
+                            local mod = self:GetModule("WoWOptions")
+                            mod.db.profile.autoLoot = val
+                            if val then
+                                mod:ForceApply()
+                            end
+                        end,
+                        get = function(info)
+                            local mod = self:GetModule("WoWOptions")
+                            return mod.db.profile.autoLoot
+                        end,
+                        disabled = function()
+                            local mod = self:GetModule("WoWOptions")
+                            return not mod.db.profile.enforceSettings
+                        end,
+                        order = 2,
+                    },
+                    assistedHighlight = {
+                        name = "Assisted Highlight",
+                        desc = "Automatically enable Assisted Targeting (highlights assist targets)",
+                        type = "toggle",
+                        set = function(info, val)
+                            local mod = self:GetModule("WoWOptions")
+                            mod.db.profile.assistedHighlight = val
+                            if val then
+                                mod:ForceApply()
+                            end
+                        end,
+                        get = function(info)
+                            local mod = self:GetModule("WoWOptions")
+                            return mod.db.profile.assistedHighlight
+                        end,
+                        disabled = function()
+                            local mod = self:GetModule("WoWOptions")
+                            return not mod.db.profile.enforceSettings
+                        end,
+                        order = 3,
+                    },
+                    cooldownManager = {
+                        name = "Enable Cooldown Manager",
+                        desc = "Automatically enable countdown numbers on cooldowns",
+                        type = "toggle",
+                        set = function(info, val)
+                            local mod = self:GetModule("WoWOptions")
+                            mod.db.profile.cooldownManager = val
+                            if val then
+                                mod:ForceApply()
+                            end
+                        end,
+                        get = function(info)
+                            local mod = self:GetModule("WoWOptions")
+                            return mod.db.profile.cooldownManager
+                        end,
+                        disabled = function()
+                            local mod = self:GetModule("WoWOptions")
+                            return not mod.db.profile.enforceSettings
+                        end,
+                        order = 4,
+                    },
+                    damageMeter = {
+                        name = "Enable Damage Meter",
+                        desc = "Automatically enable floating combat text",
+                        type = "toggle",
+                        set = function(info, val)
+                            local mod = self:GetModule("WoWOptions")
+                            mod.db.profile.damageMeter = val
+                            if val then
+                                mod:ForceApply()
+                            end
+                        end,
+                        get = function(info)
+                            local mod = self:GetModule("WoWOptions")
+                            return mod.db.profile.damageMeter
+                        end,
+                        disabled = function()
+                            local mod = self:GetModule("WoWOptions")
+                            return not mod.db.profile.enforceSettings
+                        end,
+                        order = 5,
                     },
                 },
             },
@@ -84,6 +202,8 @@ end
 
 -- Event Handlers
 function Brakk2:PLAYER_ENTERING_WORLD(event, isInitialLogin, isReloadingUi)
+    if not self.db.profile.enabled then return end
+    
     if isInitialLogin or isReloadingUi then
         self:Print("Welcome to Brakk2!")
     end
@@ -98,11 +218,30 @@ function Brakk2:SlashCommand(input)
         self:Print("  config - Open configuration panel")
         self:Print("  toggle - Toggle addon on/off")
         self:Print("  status - Show current status")
+        self:Print("  apply - Force apply WoW settings")
     elseif input == "config" then
         Settings.OpenToCategory(self.optionsFrame.name)
+    elseif input == "apply" then
+        local mod = self:GetModule("WoWOptions")
+        if mod then
+            mod:ForceApply()
+        else
+            self:Print("WoWOptions module not found")
+        end
+    elseif input == "findcvars" then
+        local mod = self:GetModule("WoWOptions")
+        if mod then
+            mod:FindCVars()
+        else
+            self:Print("WoWOptions module not found")
+        end
     elseif input == "toggle" then
         self.db.profile.enabled = not self.db.profile.enabled
-        self:Print("Addon " .. (self.db.profile.enabled and "|cFF00FF00enabled|r" or "|cFFFF0000disabled|r"))
+        if self.db.profile.enabled then
+            self:Print("|cFF00FF00Enabled|r - Addon functionality is now active")
+        else
+            self:Print("|cFFFF0000Disabled|r - Addon functionality is now inactive")
+        end
     elseif input == "status" then
         self:Print("Status: " .. (self.db.profile.enabled and "|cFF00FF00enabled|r" or "|cFFFF0000disabled|r"))
     else

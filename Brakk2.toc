@@ -10,3 +10,6 @@ embeds.xml
 
 # Core Files
 Core.lua
+
+# Modules
+Modules\WoWOptions.lua
