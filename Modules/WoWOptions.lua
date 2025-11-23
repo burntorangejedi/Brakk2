@@ -1,10 +1,130 @@
--- WoWOptions Module
--- Manages WoW game settings
-
 local addonName, addon = ...
 local Brakk2 = LibStub("AceAddon-3.0"):GetAddon("Brakk2")
 local WoWOptions = Brakk2:NewModule("WoWOptions", "AceEvent-3.0")
 WoWOptions.editModeProfiles = {}
+
+-- Returns the AceConfig options table for the WoW Options panel
+function WoWOptions:GetOptionsTable()
+    return {
+        name = "WoW Options",
+        type = "group",
+        order = 2,
+        args = {
+            desc = {
+                name = "Automatically enforce specific WoW game settings when you log in.",
+                type = "description",
+                order = 0,
+            },
+            defaultEditModeProfile = {
+                name = "Default EditMode Profile",
+                desc = "Select the EditMode profile to use by default when logging in.",
+                type = "select",
+                values = function()
+                    local profiles = self:GetEditModeProfiles()
+                    local values = {}
+                    if #profiles == 0 then
+                        values["none"] = "(Open Edit Mode once to load profiles)"
+                    else
+                        for _, p in ipairs(profiles) do
+                            values[p.id] = p.name
+                        end
+                    end
+                    return values
+                end,
+                get = function(info)
+                    return self.db.profile.defaultEditModeProfile or ""
+                end,
+                set = function(info, val)
+                    local numVal = tonumber(val)
+                    if not numVal then
+                        print("Brakk2: Please select a valid EditMode profile after opening Edit Mode.")
+                        return
+                    end
+                    self.db.profile.defaultEditModeProfile = numVal
+                    self:ApplyEditModeProfile()
+                end,
+                order = 6,
+            },
+            enforceSettings = {
+                name = "Enforce Settings",
+                desc = "Enable automatic enforcement of WoW settings",
+                type = "toggle",
+                set = function(info, val)
+                    self.db.profile.enforceSettings = val
+                end,
+                get = function(info)
+                    return self.db.profile.enforceSettings
+                end,
+                width = "full",
+                order = 1,
+            },
+            autoLoot = {
+                name = "Auto Loot",
+                desc = "Automatically enable Auto Loot in game settings",
+                type = "toggle",
+                set = function(info, val)
+                    self.db.profile.autoLoot = val
+                    if val then self:ForceApply() end
+                end,
+                get = function(info)
+                    return self.db.profile.autoLoot
+                end,
+                disabled = function()
+                    return not self.db.profile.enforceSettings
+                end,
+                order = 2,
+            },
+            assistedHighlight = {
+                name = "Assisted Highlight",
+                desc = "Automatically enable Assisted Targeting (highlights assist targets)",
+                type = "toggle",
+                set = function(info, val)
+                    self.db.profile.assistedHighlight = val
+                    if val then self:ForceApply() end
+                end,
+                get = function(info)
+                    return self.db.profile.assistedHighlight
+                end,
+                disabled = function()
+                    return not self.db.profile.enforceSettings
+                end,
+                order = 3,
+            },
+            cooldownManager = {
+                name = "Enable Cooldown Manager",
+                desc = "Automatically enable countdown numbers on cooldowns",
+                type = "toggle",
+                set = function(info, val)
+                    self.db.profile.cooldownManager = val
+                    if val then self:ForceApply() end
+                end,
+                get = function(info)
+                    return self.db.profile.cooldownManager
+                end,
+                disabled = function()
+                    return not self.db.profile.enforceSettings
+                end,
+                order = 4,
+            },
+            damageMeter = {
+                name = "Enable Damage Meter",
+                desc = "Automatically enable floating combat text",
+                type = "toggle",
+                set = function(info, val)
+                    self.db.profile.damageMeter = val
+                    if val then self:ForceApply() end
+                end,
+                get = function(info)
+                    return self.db.profile.damageMeter
+                end,
+                disabled = function()
+                    return not self.db.profile.enforceSettings
+                end,
+                order = 5,
+            },
+        },
+    }
+end
 
 -- Default settings for this module
 local defaults = {

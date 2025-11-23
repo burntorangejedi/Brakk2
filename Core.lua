@@ -2,7 +2,7 @@
 local addonName, addon = ...
 
 -- Create addon namespace
-Brakk2 = LibStub("AceAddon-3.0"):NewAddon("Brakk2", "AceConsole-3.0", "AceEvent-3.0")
+Brakk2 = LibStub("AceAddon-3.0"):NewAddon(addonName, "AceConsole-3.0", "AceEvent-3.0")
 
 -- Default settings
 local defaults = {
@@ -11,22 +11,20 @@ local defaults = {
     }
 }
 
+
 function Brakk2:OnInitialize()
     -- Initialize saved variables
-    self.db = LibStub("AceDB-3.0"):New("Brakk2DB", defaults, true)
-    
-    -- Setup options
-    self:SetupOptions()
-    
+    self.db = LibStub("AceDB-3.0"):New(addonName .. "DB", defaults, true)
     -- Register slash commands
-    self:RegisterChatCommand("brakk2", "SlashCommand")
-    
-    print("|cFF00FF00Brakk2|r loaded successfully!")
+    self:RegisterChatCommand(addonName:lower(), "SlashCommand")
+    print("|cFF00FF00" .. addonName .. "|r loaded successfully!")
 end
 
 function Brakk2:OnEnable()
     -- Register events
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
+    -- Setup options (now that all modules are loaded)
+    self:SetupOptions()
 end
 
 function Brakk2:OnDisable()
@@ -38,9 +36,9 @@ function Brakk2:SetupOptions()
     local AceConfig = LibStub("AceConfig-3.0")
     local AceConfigDialog = LibStub("AceConfigDialog-3.0")
     local AceDBOptions = LibStub("AceDBOptions-3.0")
-    
+
     local options = {
-        name = "Brakk2",
+        name = addonName,
         type = "group",
         args = {
             general = {
@@ -75,162 +73,20 @@ function Brakk2:SetupOptions()
                     },
                 },
             },
-            wowoptions = {
-                name = "WoW Options",
-                type = "group",
-                order = 2,
-                args = {
-                    desc = {
-                        name = "Automatically enforce specific WoW game settings when you log in.",
-                        type = "description",
-                        order = 0,
-                    },
-                    defaultEditModeProfile = {
-                        name = "Default EditMode Profile",
-                        desc = "Select the EditMode profile to use by default when logging in.",
-                        type = "select",
-                        values = function()
-                            local mod = self:GetModule("WoWOptions")
-                            local profiles = mod:GetEditModeProfiles()
-                            local values = {}
-                            if #profiles == 0 then
-                                values["none"] = "(Open Edit Mode once to load profiles)"
-                            else
-                                for _, p in ipairs(profiles) do
-                                    values[p.id] = p.name
-                                end
-                            end
-                            return values
-                        end,
-                        get = function(info)
-                            local mod = self:GetModule("WoWOptions")
-                            return mod.db.profile.defaultEditModeProfile or ""
-                        end,
-                        set = function(info, val)
-                            local mod = self:GetModule("WoWOptions")
-                            local numVal = tonumber(val)
-                            if not numVal then
-                                print("Brakk2: Please select a valid EditMode profile after opening Edit Mode.")
-                                return
-                            end
-                            mod.db.profile.defaultEditModeProfile = numVal
-                            mod:ApplyEditModeProfile()
-                        end,
-                        order = 6,
-                    },
-                    enforceSettings = {
-                        name = "Enforce Settings",
-                        desc = "Enable automatic enforcement of WoW settings",
-                        type = "toggle",
-                        set = function(info, val)
-                            local mod = self:GetModule("WoWOptions")
-                            mod.db.profile.enforceSettings = val
-                        end,
-                        get = function(info)
-                            local mod = self:GetModule("WoWOptions")
-                            return mod.db.profile.enforceSettings
-                        end,
-                        width = "full",
-                        order = 1,
-                    },
-                    autoLoot = {
-                        name = "Auto Loot",
-                        desc = "Automatically enable Auto Loot in game settings",
-                        type = "toggle",
-                        set = function(info, val)
-                            local mod = self:GetModule("WoWOptions")
-                            mod.db.profile.autoLoot = val
-                            if val then
-                                mod:ForceApply()
-                            end
-                        end,
-                        get = function(info)
-                            local mod = self:GetModule("WoWOptions")
-                            return mod.db.profile.autoLoot
-                        end,
-                        disabled = function()
-                            local mod = self:GetModule("WoWOptions")
-                            return not mod.db.profile.enforceSettings
-                        end,
-                        order = 2,
-                    },
-                    assistedHighlight = {
-                        name = "Assisted Highlight",
-                        desc = "Automatically enable Assisted Targeting (highlights assist targets)",
-                        type = "toggle",
-                        set = function(info, val)
-                            local mod = self:GetModule("WoWOptions")
-                            mod.db.profile.assistedHighlight = val
-                            if val then
-                                mod:ForceApply()
-                            end
-                        end,
-                        get = function(info)
-                            local mod = self:GetModule("WoWOptions")
-                            return mod.db.profile.assistedHighlight
-                        end,
-                        disabled = function()
-                            local mod = self:GetModule("WoWOptions")
-                            return not mod.db.profile.enforceSettings
-                        end,
-                        order = 3,
-                    },
-                    cooldownManager = {
-                        name = "Enable Cooldown Manager",
-                        desc = "Automatically enable countdown numbers on cooldowns",
-                        type = "toggle",
-                        set = function(info, val)
-                            local mod = self:GetModule("WoWOptions")
-                            mod.db.profile.cooldownManager = val
-                            if val then
-                                mod:ForceApply()
-                            end
-                        end,
-                        get = function(info)
-                            local mod = self:GetModule("WoWOptions")
-                            return mod.db.profile.cooldownManager
-                        end,
-                        disabled = function()
-                            local mod = self:GetModule("WoWOptions")
-                            return not mod.db.profile.enforceSettings
-                        end,
-                        order = 4,
-                    },
-                    damageMeter = {
-                        name = "Enable Damage Meter",
-                        desc = "Automatically enable floating combat text",
-                        type = "toggle",
-                        set = function(info, val)
-                            local mod = self:GetModule("WoWOptions")
-                            mod.db.profile.damageMeter = val
-                            if val then
-                                mod:ForceApply()
-                            end
-                        end,
-                        get = function(info)
-                            local mod = self:GetModule("WoWOptions")
-                            return mod.db.profile.damageMeter
-                        end,
-                        disabled = function()
-                            local mod = self:GetModule("WoWOptions")
-                            return not mod.db.profile.enforceSettings
-                        end,
-                        order = 5,
-                    },
-                },
-            },
+            -- WoW Options panel is now provided by the module
+            wowoptions = Brakk2:GetModule("WoWOptions"):GetOptionsTable(),
         },
     }
-    
+
     -- Add profiles support
     options.args.profiles = AceDBOptions:GetOptionsTable(self.db)
     options.args.profiles.order = 100
-    
+
     -- Register options
-    AceConfig:RegisterOptionsTable("Brakk2", options)
-    
+    AceConfig:RegisterOptionsTable(addonName, options)
+
     -- Add to Blizzard Interface Options
-    self.optionsFrame = AceConfigDialog:AddToBlizOptions("Brakk2", "Brakk2")
+    self.optionsFrame = AceConfigDialog:AddToBlizOptions(addonName, addonName)
     -- Refresh EditMode profiles every time the options panel is shown
     if self.optionsFrame and self.optionsFrame:HasScript("OnShow") then
         local origOnShow = self.optionsFrame:GetScript("OnShow")
@@ -247,7 +103,7 @@ end
 -- Event Handlers
 function Brakk2:PLAYER_ENTERING_WORLD(event, isInitialLogin, isReloadingUi)
     if not self.db.profile.enabled then return end
-    
+
     if isInitialLogin or isReloadingUi then
         self:Print("Welcome to Brakk2!")
     end
@@ -297,14 +153,17 @@ function Brakk2:SlashCommand(input)
     elseif input == "apply" then
         local mod = self:GetModule("WoWOptions")
         if mod then
-            mod:ForceApply()
+            local wowOptions = Brakk2:GetModule("WoWOptions")
+            if wowOptions then
+                wowOptions:ForceApply()
+            end
         else
             self:Print("WoWOptions module not found")
         end
     elseif input == "findcvars" then
         local mod = self:GetModule("WoWOptions")
         if mod then
-            mod:FindCVars()
+            -- Removed call to FindCVars (does not exist)
         else
             self:Print("WoWOptions module not found")
         end
