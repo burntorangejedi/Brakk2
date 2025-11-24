@@ -170,13 +170,9 @@ function WoWOptions:UpdateEditModeProfiles()
         if type(layouts) == "table" and type(layouts.layouts) == "table" then
             self.editModeProfiles = {}
             for i, layout in ipairs(layouts.layouts) do
-                self.editModeProfiles[#self.editModeProfiles+1] = { id = i, name = layout.layoutName or ("Layout "..i) }
+                self.editModeProfiles[#self.editModeProfiles + 1] = { id = i, name = layout.layoutName or ("Layout " .. i) }
             end
-        else
-            print("[Brakk2] No layouts found or API returned nil.")
         end
-    else
-        print("[Brakk2] C_EditMode or GetLayouts not available.")
     end
     local reg = LibStub and LibStub("AceConfigRegistry-3.0", true)
     if reg then reg:NotifyChange("Brakk2") end
@@ -196,8 +192,12 @@ function WoWOptions:ApplySettings()
     if self.db.profile.autoLoot then
         if not GetCVarBool("autoLootDefault") then
             SetCVar("autoLootDefault", "1")
-            if Brakk2.Print then Brakk2:Print("Auto Loot |cFF00FF00enabled|r") else print(
-                "Auto Loot |cFF00FF00enabled|r") end
+            if Brakk2.Print then
+                Brakk2:Print("Auto Loot |cFF00FF00enabled|r")
+            else
+                print(
+                    "Auto Loot |cFF00FF00enabled|r")
+            end
         end
     end
 
@@ -205,8 +205,12 @@ function WoWOptions:ApplySettings()
     if self.db.profile.assistedHighlight then
         if not GetCVarBool("assistedCombatHighlight") then
             SetCVar("assistedCombatHighlight", "1")
-            if Brakk2.Print then Brakk2:Print("Assisted Highlight |cFF00FF00enabled|r") else print(
-                "Assisted Highlight |cFF00FF00enabled|r") end
+            if Brakk2.Print then
+                Brakk2:Print("Assisted Highlight |cFF00FF00enabled|r")
+            else
+                print(
+                    "Assisted Highlight |cFF00FF00enabled|r")
+            end
         end
     end
 
@@ -214,8 +218,12 @@ function WoWOptions:ApplySettings()
     if self.db.profile.cooldownManager then
         if not GetCVarBool("cooldownViewerEnabled") then
             SetCVar("cooldownViewerEnabled", "1")
-            if Brakk2.Print then Brakk2:Print("Cooldown Manager |cFF00FF00enabled|r") else print(
-                "Cooldown Manager |cFF00FF00enabled|r") end
+            if Brakk2.Print then
+                Brakk2:Print("Cooldown Manager |cFF00FF00enabled|r")
+            else
+                print(
+                    "Cooldown Manager |cFF00FF00enabled|r")
+            end
         end
     end
 
@@ -223,8 +231,12 @@ function WoWOptions:ApplySettings()
     if self.db.profile.damageMeter then
         if not GetCVarBool("damageMeterEnabled") then
             SetCVar("damageMeterEnabled", "1")
-            if Brakk2.Print then Brakk2:Print("Damage Meter |cFF00FF00enabled|r") else print(
-                "Damage Meter |cFF00FF00enabled|r") end
+            if Brakk2.Print then
+                Brakk2:Print("Damage Meter |cFF00FF00enabled|r")
+            else
+                print(
+                    "Damage Meter |cFF00FF00enabled|r")
+            end
         end
     end
 end
@@ -240,20 +252,10 @@ function WoWOptions:ApplyEditModeProfile()
         profileID = tonumber(profileID)
     end
     if not profileID or type(profileID) ~= "number" or profileID < 0 or profileID > 4294967295 then
-        print("Brakk2: Invalid EditMode profile ID. Please select a valid profile from the dropdown after opening Edit Mode.")
         return
     end
     if C_EditMode and C_EditMode.SetActiveLayout and C_EditMode.GetLayouts then
-        local layouts = C_EditMode.GetLayouts()
         local apiIndex = profileID + 2
-        print("[Brakk2] Attempting to set active layout to:", apiIndex)
-        if type(layouts) == "table" then
-            print("[Brakk2] Current layouts:")
-            for i, layout in ipairs(layouts.layouts or {}) do
-                print(string.format("  %d: %s", i, layout.layoutName or "(no name)"))
-            end
-            print("[Brakk2] activeLayout:", layouts.activeLayout)
-        end
         C_EditMode.SetActiveLayout(apiIndex)
     end
 end

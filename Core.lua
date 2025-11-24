@@ -25,6 +25,11 @@ function Brakk2:OnEnable()
     self:RegisterEvent("PLAYER_ENTERING_WORLD")
     -- Setup options (now that all modules are loaded)
     self:SetupOptions()
+
+    -- Enable DominosTweaks module if present
+    if self:GetModule("DominosTweaks", true) then
+        self:EnableModule("DominosTweaks")
+    end
 end
 
 function Brakk2:OnDisable()
@@ -71,10 +76,53 @@ function Brakk2:SetupOptions()
                         type = "description",
                         order = 3,
                     },
+                    modules = {
+                        name = "Modules",
+                        type = "group",
+                        inline = true,
+                        order = 10,
+                        args = {
+                            wowoptions = {
+                                name = "WoW Options",
+                                desc = "Enable or disable the WoW Options module",
+                                type = "toggle",
+                                set = function(info, val)
+                                    if val then
+                                        self:EnableModule("WoWOptions")
+                                    else
+                                        self:DisableModule("WoWOptions")
+                                    end
+                                end,
+                                get = function(info)
+                                    local mod = self:GetModule("WoWOptions", true)
+                                    return mod and mod:IsEnabled() or false
+                                end,
+                                order = 1,
+                            },
+                            dominostweaks = {
+                                name = "Dominos Tweaks",
+                                desc = "Enable or disable the Dominos Tweaks module",
+                                type = "toggle",
+                                set = function(info, val)
+                                    if val then
+                                        self:EnableModule("DominosTweaks")
+                                    else
+                                        self:DisableModule("DominosTweaks")
+                                    end
+                                end,
+                                get = function(info)
+                                    local mod = self:GetModule("DominosTweaks", true)
+                                    return mod and mod:IsEnabled() or false
+                                end,
+                                order = 2,
+                            },
+                        },
+                    },
                 },
             },
             -- WoW Options panel is now provided by the module
             wowoptions = Brakk2:GetModule("WoWOptions"):GetOptionsTable(),
+            dominostweaks = Brakk2:GetModule("DominosTweaks"):GetOptionsTable(),
         },
     }
 
@@ -176,6 +224,12 @@ function Brakk2:SlashCommand(input)
         end
     elseif input == "status" then
         self:Print("Status: " .. (self.db.profile.enabled and "|cFF00FF00enabled|r" or "|cFFFF0000disabled|r"))
+    elseif input == "dominosdebug" then
+        if _G.Brakk2_DominosDebug then
+            _G.Brakk2_DominosDebug()
+        else
+            self:Print("DominosTweaks debug function not found.")
+        end
     else
         self:Print("Unknown command: " .. input)
     end
