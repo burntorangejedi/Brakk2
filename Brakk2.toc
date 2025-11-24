@@ -12,5 +12,7 @@ embeds.xml
 Core.lua
 
 # Modules
-Modules\WoWOptions.lua
-Modules\DominosTweaks.lua
+Modules/WoWOptions.lua
+Modules/DominosTweaks.lua
+LDB/Durability.lua
+Modules/InfoBar.lua

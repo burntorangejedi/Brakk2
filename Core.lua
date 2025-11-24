@@ -123,6 +123,7 @@ function Brakk2:SetupOptions()
             -- WoW Options panel is now provided by the module
             wowoptions = Brakk2:GetModule("WoWOptions"):GetOptionsTable(),
             dominostweaks = Brakk2:GetModule("DominosTweaks"):GetOptionsTable(),
+            infobar = Brakk2:GetModule("InfoBar"):GetOptionsTable(),
         },
     }
 
