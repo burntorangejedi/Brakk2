@@ -116,6 +116,23 @@ function Brakk2:SetupOptions()
                                 end,
                                 order = 2,
                             },
+                           instancewatcher = {
+                               name = "Instance Watcher",
+                               desc = "Enable or disable the Instance Watcher module",
+                               type = "toggle",
+                               set = function(info, val)
+                                   if val then
+                                       self:EnableModule("InstanceWatcher")
+                                   else
+                                       self:DisableModule("InstanceWatcher")
+                                   end
+                               end,
+                               get = function(info)
+                                   local mod = self:GetModule("InstanceWatcher", true)
+                                   return mod and mod:IsEnabled() or false
+                               end,
+                               order = 10,
+                           },
                         },
                     },
                 },
@@ -124,6 +141,7 @@ function Brakk2:SetupOptions()
             wowoptions = Brakk2:GetModule("WoWOptions"):GetOptionsTable(),
             dominostweaks = Brakk2:GetModule("DominosTweaks"):GetOptionsTable(),
             infobar = Brakk2:GetModule("InfoBar"):GetOptionsTable(),
+            instancewatcher = Brakk2:GetModule("InstanceWatcher"):GetOptionsTable(),
         },
     }
 
