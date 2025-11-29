@@ -24,6 +24,15 @@ function InstanceWatcher:OnDisable()
     self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 end
 
+local function TryCombatLog()
+    if type(RunMacroText) == "function" then
+        RunMacroText("/combatlog")
+        Brakk2:Print("Tried to enable combat logging with /combatlog macro.")
+    else
+        Brakk2:Print("|cffff0000Unable to enable combat logging automatically. Please type /combatlog manually.|r")
+    end
+end
+
 function InstanceWatcher:CheckInstance()
     local name, instanceType = GetInstanceInfo()
     if instanceType ~= self.db.profile.lastInstanceType then
@@ -31,10 +40,10 @@ function InstanceWatcher:CheckInstance()
         if self.db.profile.enabled then
             if instanceType == "party" then
                 Brakk2:Print("You have entered a dungeon: " .. (name or ""))
-                ConsoleExec("combatlog")
+                TryCombatLog()
             elseif instanceType == "raid" then
                 Brakk2:Print("You have entered a raid: " .. (name or ""))
-                ConsoleExec("combatlog")
+                TryCombatLog()
             elseif instanceType == "none" then
                 Brakk2:Print("You have left an instance.")
             end

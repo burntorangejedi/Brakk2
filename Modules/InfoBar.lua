@@ -31,10 +31,17 @@ function InfoBar:OnInitialize()
     self.db = Brakk2.db:RegisterNamespace("InfoBar", defaults)
 end
 
+
 function InfoBar:OnEnable()
     self:CreateBar()
+    if frame then frame:Show() end
     self:RegisterEvent("UPDATE_INVENTORY_DURABILITY", "UpdatePlugins")
     self:UpdatePlugins()
+end
+
+function InfoBar:OnDisable()
+    if frame then frame:Hide() end
+    self:UnregisterEvent("UPDATE_INVENTORY_DURABILITY")
 end
 
 function InfoBar:CreateBar()
