@@ -17,3 +17,4 @@ Modules/DominosTweaks.lua
 LDB/Durability.lua
 Modules/InfoBar.lua
 Modules/InstanceWatcher.lua
+Modules/ProfileManager.lua

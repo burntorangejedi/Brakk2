@@ -141,6 +141,7 @@ function Brakk2:SetupOptions()
             wowoptions = Brakk2:GetModule("WoWOptions"):GetOptionsTable(),
             dominostweaks = Brakk2:GetModule("DominosTweaks"):GetOptionsTable(),
             infobar = Brakk2:GetModule("InfoBar"):GetOptionsTable(),
+            profilemanager = Brakk2:GetModule("ProfileManager"):GetOptionsTable(),
             instancewatcher = Brakk2:GetModule("InstanceWatcher"):GetOptionsTable(),
         },
     }
